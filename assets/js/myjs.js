@@ -29,14 +29,18 @@ var questionBank = [
 var currentQuestions = 0
 var correctAnswers = 0
 var incorrectAnswers = 0
-var timeLeft = 10;
+var timeLeft = 60;
+var instantGrade = "Good Luck";
 
 var mainContentEl = document.querySelector("#main-content");
 var h1ContentEl = document.querySelector("#this-content");
 var pContentEl = document.querySelector("#description");
 var p2ContentEl = document.querySelector("#description2");
 var olEl = document.querySelector("#my-list");
-var timerEl = document.querySelector("#time-remaining")
+var timerEl = document.querySelector("#time-remaining");
+var scoreEl = document.querySelector("#scores");
+scoreEl.textContent = "View High Scores";
+scoreEl.className = "top-box";
 
 var systemStartup = function () {
 
@@ -51,10 +55,20 @@ var systemStartup = function () {
     button.appendChild(buttonText);
 
     mainContentEl.appendChild(button);
-    console.log("hello")
 }
 var displayResults = function () {
-    console.log("hello clarice")
+    timerEl.textContent = "Time Remaining:  " + 0;
+    h1ContentEl.textContent = "Results";
+
+    var correctEl = document.createElement('h2');
+    var correctElText = document.createTextNode("Correct Answers:  " + correctAnswers);
+    correctEl.appendChild(correctElText);
+    mainContentEl.appendChild(correctEl);
+
+    var incorrectEl = document.createElement('h2');
+    var incorrectElText = document.createTextNode("Incorrect Answers:  " + incorrectAnswers);
+    incorrectEl.appendChild(incorrectElText);
+    mainContentEl.appendChild(incorrectEl);
 }
 var startTimer = function () {
     var timeInterval = setInterval(function () {
@@ -66,11 +80,15 @@ var startTimer = function () {
         }
         else {
             clearInterval(timeInterval);
+            document.getElementById("0").remove()
+            document.getElementById("1").remove()
+            document.getElementById("2").remove()
+            document.getElementById("3").remove()
             displayResults();
         }
     }, 1000);
 }
-var serveQuestion = function (questionNumber) {
+var serveQuestion = function (questionNumber, instantGrade) {
 
     h1ContentEl.textContent = questionBank[questionNumber].Q;
 
@@ -83,6 +101,10 @@ var serveQuestion = function (questionNumber) {
         buttonDefault.appendChild(buttonDefaultText);
         mainContentEl.appendChild(buttonDefault)
     }
+    if (questionNumber > 0) {
+        instantGrader(instantGrade);
+    }
+
 }
 
 var startQuiz = function () {
@@ -99,21 +121,28 @@ document.getElementById("startButton").addEventListener("click", function () {
     document.getElementById("startButton").remove()
     startQuiz();
 });
+var instantGrader = function (instantGrade) {
+    instantGradeEl = document.createElement('p');
+    instantGradeEl.id = "grader"
+    if (instantGrade === "Correct!" || instantGrade === "Incorrect!") {
+        var instantGradeElText = document.createTextNode(instantGrade);
+        instantGradeEl.appendChild(instantGradeElText);
+        mainContentEl.appendChild(instantGradeEl)
+    }
+}
 
 document.addEventListener('click', function (e) {
-    console.log(e)
     if (e.target.className === "answer-buttons") {
         var userAnswer = (parseInt(e.target.id));
-        console.log(userAnswer)
-        console.log(questionBank[currentQuestions].A)
         if (userAnswer === questionBank[currentQuestions].A) {
             correctAnswers++
+            instantGrade = "Correct!";
         }
         else {
             incorrectAnswers++
+            instantGrade = "Incorrect!";
             timeLeft -= 10
         }
-        console.log(correctAnswers, incorrectAnswers)
         document.getElementById("0").remove()
         document.getElementById("1").remove()
         document.getElementById("2").remove()
@@ -121,11 +150,17 @@ document.addEventListener('click', function (e) {
 
         currentQuestions++
 
-        serveQuestion(currentQuestions);
-        // if statement if the answer was correct
+        var elementName = document.getElementById("grader")
+        if (elementName !== null) {
+            elementName.remove()
+        }
 
-        //increment counter
+        if (parseInt(currentQuestions) == parseInt(questionBank.length)) {
+            timeLeft = 0
+        }
+        else {
+            serveQuestion(currentQuestions, instantGrade);
+        }
 
-        //serverqustions();
     }
 })
