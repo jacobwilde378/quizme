@@ -63,13 +63,136 @@ var displayResults = function () {
     var correctEl = document.createElement('h2');
     var correctElText = document.createTextNode("Correct Answers:  " + correctAnswers);
     correctEl.appendChild(correctElText);
+    correctEl.id = "numCorrect"
     mainContentEl.appendChild(correctEl);
 
     var incorrectEl = document.createElement('h2');
     var incorrectElText = document.createTextNode("Incorrect Answers:  " + incorrectAnswers);
     incorrectEl.appendChild(incorrectElText);
+    incorrectEl.id = "numIncorrect"
     mainContentEl.appendChild(incorrectEl);
+
+    var finalScreen = function () {
+        document.getElementById("h2-final-score").remove();
+        document.getElementById("user-data").remove();
+        document.getElementById("submit-button").remove();
+        
+        var name1El = document.createElement('h2');
+        name1El.id = 'content-1'
+        name1El.textContent = "1.  " + localStorage.getItem("name1") + " - " + localStorage.getItem("score1")
+        mainContentEl.appendChild(name1El)
+
+
+        var name2El = document.createElement('h2');
+        name2El.id = 'content-2'
+        name2El.textContent = "2.  " + localStorage.getItem("name2") + " - " + localStorage.getItem("score2")
+        mainContentEl.appendChild(name2El)
+
+        var name3El = document.createElement('h2');
+        name3El.id = 'content-3'
+        name3El.textContent = "3.  " + localStorage.getItem("name3") + " - " + localStorage.getItem("score3")
+        mainContentEl.appendChild(name3El)
+        
+        var clearScores = document.createElement('button');
+        clearScores.id = 'clear-high-scores'
+        clearScores.textContent = "Clear High Scores"
+        mainContentEl.appendChild(clearScores)
+
+        var tryAgain = document.createElement('button');
+        tryAgain.id = "try-again"
+        tryAgain.textContent = "Take Test Again"
+        mainContentEl.appendChild(tryAgain)
+
+        document.getElementById('clear-high-scores').addEventListener('click', function() {
+            localStorage.setItem('name1', "")
+            localStorage.setItem('name2', "")
+            localStorage.setItem('name3', "")
+
+            localStorage.setItem('score1', "0")
+            localStorage.setItem('score2', "0")
+            localStorage.setItem('score3', "0")
+
+
+            document.getElementById("content-1").remove();
+            document.getElementById("content-2").remove();
+            document.getElementById("content-3").remove();
+            document.getElementById("clear-high-scores").remove();
+            document.getElementById("try-again").remove();
+            window.location.reload(false)
+        })
+
+        document.getElementById('try-again').addEventListener('click', function() {
+            window.location.reload(false)
+        })
+    }
+
+    var buildForm = function (correctAnswers) {
+        var name1 = localStorage.getItem("name1");
+        var name2 = localStorage.getItem("name2");
+        var name3 = localStorage.getItem("name3");
+        var score1 = localStorage.getItem("score1");
+        var score2 = localStorage.getItem("score2");
+        var score3 = localStorage.getItem("score3")
+
+
+        var inputName = document.createElement('input')
+        inputName.id = "user-data"
+        inputName.type = "text";
+        inputName.name = "Name-Input";
+        inputName.placeholder = "Please Enter Your Initials!"
+        mainContentEl.appendChild(inputName)
+
+        var inputCommit = document.createElement('button');
+        inputCommit.id = "submit-button";
+        inputCommit.textContent = "Submit";
+        mainContentEl.appendChild(inputCommit)
+
+        document.getElementById("submit-button").addEventListener('click', function () {
+            var userInput = document.getElementById("user-data").value;
+            if (correctAnswers > score1) {
+                localStorage.setItem("name1", userInput)
+                localStorage.setItem("name2", name1)
+                localStorage.setItem("name3", name2)
+                localStorage.setItem("score1", correctAnswers)
+                localStorage.setItem("score2", score1)
+                localStorage.setItem("score3", score2)
+            }
+            else if (correctAnswers > score2) {
+                localStorage.setItem("name2", userInput)
+                localStorage.setItem("score2", correctAnswers)
+                localStorage.setItem("name3", name2)
+                localStorage.setItem("score3", score2)
+
+            }
+            else if (correctAnswers > score3) {
+                localStorage.setItem("name3", userInput)
+                localStorage.setItem("score3", correctAnswers)
+
+            }
+            finalScreen();
+        })
+
+    }
+
+    var buttonHiEl = document.createElement('button');
+    buttonHiEl.id = "high-score"
+    var buttonHiElText = document.createTextNode("View High Score");
+    buttonHiEl.appendChild(buttonHiElText);
+    mainContentEl.appendChild(buttonHiEl);
+
+    document.getElementById("high-score").addEventListener('click', function () {
+        buttonHiEl.remove();
+        h1ContentEl.textContent = "All Done!";
+        document.getElementById("numCorrect").remove();
+        document.getElementById("numIncorrect").remove();
+        var resultScore = document.createElement('h2');
+        resultScore.id = "h2-final-score"
+        resultScore.textContent = "Your final score is " + correctAnswers + "/" + questionBank.length;
+        mainContentEl.appendChild(resultScore);
+        buildForm(correctAnswers);
+    })
 }
+
 var startTimer = function () {
     var timeInterval = setInterval(function () {
 
@@ -80,10 +203,12 @@ var startTimer = function () {
         }
         else {
             clearInterval(timeInterval);
-            document.getElementById("0").remove()
-            document.getElementById("1").remove()
-            document.getElementById("2").remove()
-            document.getElementById("3").remove()
+            if (document.getElementById("0")) {
+                document.getElementById("0").remove()
+                document.getElementById("1").remove()
+                document.getElementById("2").remove()
+                document.getElementById("3").remove()
+            }
             displayResults();
         }
     }, 1000);
@@ -105,6 +230,7 @@ var serveQuestion = function (questionNumber, instantGrade) {
         instantGrader(instantGrade);
     }
 
+
 }
 
 var startQuiz = function () {
@@ -121,6 +247,7 @@ document.getElementById("startButton").addEventListener("click", function () {
     document.getElementById("startButton").remove()
     startQuiz();
 });
+
 var instantGrader = function (instantGrade) {
     instantGradeEl = document.createElement('p');
     instantGradeEl.id = "grader"
@@ -130,6 +257,10 @@ var instantGrader = function (instantGrade) {
         mainContentEl.appendChild(instantGradeEl)
     }
 }
+
+document.getElementById("scores").addEventListener("click", function() {
+    displayResults();
+})
 
 document.addEventListener('click', function (e) {
     if (e.target.className === "answer-buttons") {
